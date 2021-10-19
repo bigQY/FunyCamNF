@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31702.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunyCamNF", "FunyCamNF.csproj", "{D9A7FF9A-4658-4718-AEFE-0520D5F5D843}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D9A7FF9A-4658-4718-AEFE-0520D5F5D843}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9A7FF9A-4658-4718-AEFE-0520D5F5D843}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9A7FF9A-4658-4718-AEFE-0520D5F5D843}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9A7FF9A-4658-4718-AEFE-0520D5F5D843}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0AC79672-DCF9-44E6-B042-82495836B4DB}
+	EndGlobalSection
+EndGlobal
