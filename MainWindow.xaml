@@ -16,7 +16,7 @@
      FontFamily="{DynamicResource MaterialDesignFont}"
         mc:Ignorable="d"
         AllowsTransparency="False"
-        Title="MainWindow" Height="500" Width="1300">
+        Title="MainWindow" Height="700" Width="1300">
     <materialDesign:DialogHost
         Identifier="RootDialog"
         DialogTheme="Inherit"

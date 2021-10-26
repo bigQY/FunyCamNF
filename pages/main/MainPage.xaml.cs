@@ -37,7 +37,7 @@ namespace FunyCamNF.pages.main
     {
         public WindowsFormsHost formsHostFiltered,formsHostOrigin;
         private List<string> deviceList = new List<string>();
-        private FilterInfoCollection videoDevices;
+        private FilterInfo videoDevice;
         private VideoCaptureDevice originalSource;
         private AsyncVideoSource transSource;
 
@@ -50,6 +50,7 @@ namespace FunyCamNF.pages.main
         public MainPage()
         {
             InitializeComponent();
+            SnackbarERROR.MessageQueue = new SnackbarMessageQueue();
             filterList.Add("反色");
             filterList.Add("模糊");
             filterList.Add("edges");
@@ -68,27 +69,28 @@ namespace FunyCamNF.pages.main
             try
             {
                 // 枚举所有视频输入设备
-                videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+                var videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
                 if (videoDevices.Count == 0)
                     throw new ApplicationException();
-
+                var devideName = Tools.readSettings("lastDeviceName");
                 foreach (FilterInfo device in videoDevices)
                 {
-                    deviceList.Add(device.Name);
-                }
-                camListBox.ItemsSource = deviceList;
-                camListBox.SelectedIndex = 0;
-                filterListBox.SelectedItem = 0;
-                // 检查上次选择的相机设备
-                string lastDeviceName = Tools.readSettings("lastDeviceName");
-                for (int i = 0; i < deviceList.Count; i++)
-                {
-                    if (deviceList[i].Equals(lastDeviceName))
+                    if (device.Name == devideName)
                     {
-                        camListBox.SelectedIndex = i;
-                        break;
+                        videoDevice = device;
                     }
                 }
+                if (videoDevice == null)
+                {
+
+                    var message = new SnackbarMessage
+                    {
+                        Content = "没有读取到视频设备，请检查设置是否正确！",
+                        Margin = new Thickness(0, 0, 0, 0),
+                    };
+                    SnackbarERROR.MessageQueue.Enqueue(message);
+                }
+                filterListBox.SelectedItem = 0;
                 //检查上次的滤镜选择
                 string lastFilterName = Tools.readSettings("lastFilterName");
                 for (int i = 0; i < filterList.Count; i++)
@@ -98,13 +100,11 @@ namespace FunyCamNF.pages.main
                         filterListBox.SelectedIndex = i;
                     }
                 }
-
-
             }
             catch (ApplicationException)
             {
                 camListBox.Items.Add("No local capture devices");
-                videoDevices = null;
+                videoDevice = null;
             }
         }
 
@@ -116,9 +116,8 @@ namespace FunyCamNF.pages.main
             // 断开连接
             Button_Disconnect_Cam_Click_(sender, e);
 
-            originalSource = new VideoCaptureDevice(videoDevices[camListBox.SelectedIndex].MonikerString);//连接摄像头
-            originalSource.VideoResolution = originalSource.VideoCapabilities[camListBox.SelectedIndex];
-
+            originalSource = new VideoCaptureDevice(videoDevice.MonikerString);//连接摄像头
+            originalSource.VideoResolution = originalSource.VideoCapabilities[0];
 
             transSource = new AsyncVideoSource(originalSource);
             transSource.NewFrame += OriginalSource_NewFrame;
@@ -128,8 +127,6 @@ namespace FunyCamNF.pages.main
             vp2.VideoSource = originalSource;
             vp2.Start();
             vp1.Start();
-            //保存当前相机设备名
-            Tools.saveSettings("lastDeviceName", deviceList[camListBox.SelectedIndex]);
             //保存当前滤镜名
             Tools.saveSettings("lastFilterName", filterList[filterListBox.SelectedIndex]);
         }
@@ -281,6 +278,11 @@ namespace FunyCamNF.pages.main
         private void Nav_Button_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void SnackbarERRORMessage_ActionClick(object sender, RoutedEventArgs e)
+        {
+            SnackbarERROR.IsActive = false;
         }
 
         private void Button_recoder(object sender, RoutedEventArgs e)

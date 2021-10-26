@@ -3,7 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:FunyCamNF.pages.main" xmlns:wfi="http://schemas.microsoft.com/netfx/2007/xaml/presentation" xmlns:aforge="clr-namespace:AForge.Controls;assembly=AForge.Controls"
+      xmlns:local="clr-namespace:FunyCamNF.pages.main" xmlns:wfi="http://schemas.microsoft.com/netfx/2007/xaml/presentation" xmlns:aforge="clr-namespace:AForge.Controls;assembly=AForge.Controls" xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
       d:DesignHeight="500" d:DesignWidth="1300"
       Title="MainPage">
@@ -37,5 +37,10 @@
                 <Button Content="开始录制" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Button_recoder" Margin="0,0,10,0" Height="30"/>
                 <Button x:Name="btnSetting" Click="btnSetting_Click">设置</Button>
             </StackPanel>
-        </Grid>
+        <!-- long hand form for setting the message -->
+        <materialDesign:Snackbar
+            x:Name="SnackbarERROR"
+            IsActive="False" Grid.Row="2" Grid.ColumnSpan="2" >
+        </materialDesign:Snackbar>
+    </Grid>
 </Page>

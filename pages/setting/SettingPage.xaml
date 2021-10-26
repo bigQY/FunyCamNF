@@ -16,8 +16,19 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="8*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Label Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">设置</Label>
-        <GroupBox Grid.Column="1" Header="相机设置" Grid.Row="1" />
+        <GroupBox Grid.Column="1" Header="相机设置" Grid.Row="1" >
+            <StackPanel >
+                <StackPanel Orientation="Horizontal">
+                    <Label HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,40,0">选择相机设备</Label>
+                    <ComboBox x:Name="camListBox" Margin="0" Width="150" VerticalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button Click="Button_Setting_sace_Click">保存</Button>
+        </StackPanel>
     </Grid>
 </Page>
