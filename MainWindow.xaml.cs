@@ -25,6 +25,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Configuration;
 using FunyCamNF.utils;
+using AForge.Video.FFMPEG;
 
 namespace FunyCamNF
 {
@@ -41,6 +42,8 @@ namespace FunyCamNF
         private List<string> filterList = new List<string>();
 
         private int selectedIndex = 0;
+        private VideoFileWriter writer;   
+        private bool IsRecordVideo = false;   //是否开始录像
 
         public MainWindow()
         {
@@ -51,6 +54,7 @@ namespace FunyCamNF
             filterList.Add("pixellate");
             filterList.Add("Jitter");
             filterList.Add("Erosion3x3");
+            filterList.Add("动态旋转");
             filterListBox.ItemsSource = filterList;
             getDevices();
 
@@ -156,7 +160,11 @@ namespace FunyCamNF
             {
                 TestFilter testFilter = new TestFilter();
                 testFilter.ApplyInPlace(bitmap);
-
+            }
+            else if (selectedIndex == 6)
+            {
+                DynamicRotateFilter dynamicRotateFilter = new DynamicRotateFilter();
+                dynamicRotateFilter.ApplyInPlace(bitmap);
             }
 
         }
@@ -272,5 +280,10 @@ namespace FunyCamNF
 
         }
 
+        private void Button_recoder(object sender, RoutedEventArgs e)
+        {
+        }
+
     }
+}
 }
