@@ -57,11 +57,8 @@
                         <ListBox.Resources>
                             <Style TargetType="ScrollBar" BasedOn="{StaticResource MaterialDesignScrollBarMinimal}"/>
                         </ListBox.Resources>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate >
-                                <TextBlock Text="{Binding Name}"  Margin="24 4 0 4" AutomationProperties.AutomationId="DemoItemPage"/>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
+               
+                        
                     </ListBox>
                 </DockPanel>
             </materialDesign:DrawerHost.LeftDrawerContent>

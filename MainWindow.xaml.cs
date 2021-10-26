@@ -27,6 +27,7 @@ using System.Configuration;
 using FunyCamNF.utils;
 using AForge.Video.FFMPEG;
 using FunyCamNF.pages.main;
+using FunyCamNF.pages.setting;
 
 namespace FunyCamNF
 {
@@ -35,16 +36,63 @@ namespace FunyCamNF
     /// </summary>
     public partial class MainWindow : Window
     {
+        List<string> pages = new List<string>();
         MainPage mainPage = new MainPage();
         public MainWindow()
         {
             InitializeComponent();
-            mainFrame.Content = mainPage;
+            InitMenus();
         }
 
-     
-       
+        private void InitMenus()
+        {
+            pages.Add("主页");
+            pages.Add("设置");
+            DemoItemsListBox.ItemsSource = pages;
+            DemoItemsListBox.SelectionChanged += DemoItemsListBox_SelectionChanged;
+            DemoItemsListBox.SelectedItem = "主页";
+            DemoItemsSearchBox.TextChanged += DemoItemsSearchBox_TextChanged;
+        }
 
+        //搜索框文本发生变化时
+        private void DemoItemsSearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (DemoItemsSearchBox.Text.Length == 0)
+            {
+                DemoItemsListBox.ItemsSource = pages;
+                return;
+            }
+            List<string> searchedPages = new List<string>();
+            foreach (var page in pages)
+            {
+                if (page.Contains(DemoItemsSearchBox.Text))
+                {
+                    searchedPages.Add(page);
+                }
+            }
+            DemoItemsListBox.ItemsSource = searchedPages;
+        }
+
+        // 侧边页面选择发生变化时
+        private void DemoItemsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DemoItemsListBox.SelectedItem == null)
+            {
+                return;
+            }
+            switch (DemoItemsListBox.SelectedItem.ToString())
+            {
+                case "主页":
+                    mainFrame.Navigate(mainPage);
+                    break;
+                case "设置":
+                    mainFrame.Navigate(new SettingPage());
+                    break;
+                default:
+                    break;
+            }
+   
+        }
 
         private void UIElement_OnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
