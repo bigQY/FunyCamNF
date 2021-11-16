@@ -58,29 +58,25 @@ namespace FunyCamNF.filters
             int centerX = w / 2;
             int centerY = h / 2;
             byte[] tempData = new byte[length];
-            //扭曲区间
-            int R = 4;
             for (int j = 0; j < h; j++)
             {
                 for (int i = 0; i < w; i++)
                 {
-                    oldX = i;
-                    //oldY = j * 2;
-                    oldY = j;
-                    //R = ((R + 1) % 700);
-                    double theta = Math.Atan2((double)(oldY - centerY), (double)(oldX - centerX));
-                    double dis = Math.Sqrt((centerX - i) * (centerX - i) + (centerY - j) * (centerY - j));
-                    /*
-                                        int newX = centerX + (int)(R * Math.Cos(theta));
-                                        int newY = centerY + (int)(R * Math.Sin(theta));*/
 
-                    /* x = int(cx + (math.sqrt(math.sqrt(tx * tx + ty * ty)) * compress * math.cos(math.atan2(ty, tx))))
-                     y = int(cy + (math.sqrt(math.sqrt(tx * tx + ty * ty)) * compress * math.sin(math.atan2(ty, tx))))
- */
-                    int tempx = oldX - centerX;
-                    int tempy = oldY - centerY;
-                    int newX = centerX + (int)Math.Sqrt(dis* R * Math.Cos(Math.Atan2(tempy,tempx)));
-                    int newY = centerY + (int)Math.Sqrt(dis * R * Math.Sin(Math.Atan2(tempy, tempx)));
+                    int degree = 32;
+
+                    int offsetX = i - centerX;
+                    int offsetY = j - centerY;
+
+
+                    double radian = Math.Atan2((double)offsetY, (double)offsetX);
+
+                    // 半径
+                    double radius = Math.Sqrt((float)(offsetX * offsetX + offsetY * offsetY));
+                    radius = Math.Sqrt(radius) * degree;
+
+                    int newX = (int)(radius * Math.Cos(radian)) + centerX;
+                    int newY = (int)(radius * Math.Sin(radian)) + centerY;
 
 
                     if (newX < 0)
