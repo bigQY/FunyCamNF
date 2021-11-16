@@ -58,6 +58,9 @@ namespace FunyCamNF.pages.main
             filterList.Add("Jitter");
             filterList.Add("Erosion3x3");
             filterList.Add("动态旋转");
+            filterList.Add("拉伸1");
+            filterList.Add("凸透镜");
+            filterList.Add("凹透镜");
             filterListBox.ItemsSource = filterList;
             getDevices();
             formsHostFiltered = formHost1;
@@ -134,40 +137,77 @@ namespace FunyCamNF.pages.main
         private void OriginalSource_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
             Bitmap bitmap = eventArgs.Frame;
-            if (selectedIndex == 0)
+
+            switch (selectedIndex)
             {
-                Invert filter = new Invert();
-                filter.ApplyInPlace(bitmap);
-            }
-            else if (selectedIndex == 1)
-            {
-                Blur filter = new Blur();
-                filter.ApplyInPlace(bitmap);
-            }
-            else if (selectedIndex == 2)
-            {
-                Edges filter = new Edges();
-                filter.ApplyInPlace(bitmap);
-            }
-            else if (selectedIndex == 3)
-            {
-                AForge.Imaging.Filters.Pixellate pixellate = new Pixellate(50);
-                pixellate.ApplyInPlace(bitmap);
-            }
-            else if (selectedIndex == 4)
-            {
-                Jitter pointed = new Jitter(500);
-                pointed.ApplyInPlace(bitmap);
-            }
-            else if (selectedIndex == 5)
-            {
-                TestFilter testFilter = new TestFilter();
-                testFilter.ApplyInPlace(bitmap);
-            }
-            else if (selectedIndex == 6)
-            {
-                DynamicRotateFilter dynamicRotateFilter = new DynamicRotateFilter();
-                dynamicRotateFilter.ApplyInPlace(bitmap);
+                case 0:
+                    {
+                        Invert filter = new Invert();
+                        filter.ApplyInPlace(bitmap);
+                        break;
+                    }
+
+                case 1:
+                    {
+                        Blur filter = new Blur();
+                        filter.ApplyInPlace(bitmap);
+                        break;
+                    }
+
+                case 2:
+                    {
+                        Edges filter = new Edges();
+                        filter.ApplyInPlace(bitmap);
+                        break;
+                    }
+
+                case 3:
+                    {
+                        Pixellate pixellate = new Pixellate(50);
+                        pixellate.ApplyInPlace(bitmap);
+                        break;
+                    }
+
+                case 4:
+                    {
+                        Jitter pointed = new Jitter(500);
+                        pointed.ApplyInPlace(bitmap);
+                        break;
+                    }
+
+                case 5:
+                    {
+                        TestFilter testFilter = new TestFilter();
+                        testFilter.ApplyInPlace(bitmap);
+                        break;
+                    }
+
+                case 6:
+                    {
+                        DynamicRotateFilter dynamicRotateFilter = new DynamicRotateFilter();
+                        dynamicRotateFilter.ApplyInPlace(bitmap);
+                        break;
+                    }
+
+                case 7:
+                    {
+                        TransX transX = new TransX();
+                        transX.ApplyInPlace(bitmap);
+                        break;
+                    }
+
+                case 8:
+                    {
+                        ConvexFilter convex = new ConvexFilter();
+                        convex.ApplyInPlace(bitmap);
+                        break;
+                    }
+                case 9:
+                    {
+                        ConcaveFilter concave = new ConcaveFilter();
+                        concave.ApplyInPlace(bitmap);
+                        break;
+                    }
             }
 
         }
