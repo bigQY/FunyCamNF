@@ -132,6 +132,9 @@ namespace FunyCamNF.pages.main
             vp1.Start();
             //保存当前滤镜名
             Tools.saveSettings("lastFilterName", filterList[filterListBox.SelectedIndex]);
+            //允许点击截图和录制
+            buttonRecoder.IsEnabled = true;
+            buttonSnapshot.IsEnabled=true;
         }
 
         private void OriginalSource_NewFrame(object sender, NewFrameEventArgs eventArgs)
@@ -323,6 +326,30 @@ namespace FunyCamNF.pages.main
         private void SnackbarERRORMessage_ActionClick(object sender, RoutedEventArgs e)
         {
             SnackbarERROR.IsActive = false;
+        }
+
+        private void Button_Snapshot(object sender, RoutedEventArgs e)
+        {
+            Bitmap bitmapOrigin=vp2.GetCurrentVideoFrame();
+            Bitmap bitmapTransed = vp1.GetCurrentVideoFrame();
+            string path = Tools.readSettings("PictureSavePath");
+            string fileName = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString();
+            string fileFormatName = "";
+            string PictureSaveFormat = Tools.readSettings("PictureSaveFormat");
+            if (PictureSaveFormat.Equals("BMP"))
+            {
+                fileFormatName = ".bmp";
+                bitmapOrigin.Save(path + '\\' + fileName + "原始图片" + fileFormatName, System.Drawing.Imaging.ImageFormat.Bmp);
+                bitmapTransed.Save(path + '\\' + fileName + "哈哈镜处理图片" + fileFormatName, System.Drawing.Imaging.ImageFormat.Bmp);
+
+            }
+            else
+            {
+                fileFormatName = ".jpg";
+                bitmapOrigin.Save(path +'\\'+ fileName + "原始图片" + fileFormatName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                bitmapTransed.Save(path + '\\' + fileName + "哈哈镜处理图片" + fileFormatName, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+            }
         }
 
         private void Button_recoder(object sender, RoutedEventArgs e)

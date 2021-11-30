@@ -19,16 +19,40 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Label Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">设置</Label>
-        <GroupBox Grid.Column="1" Header="相机设置" Grid.Row="1" >
-            <StackPanel >
-                <StackPanel Orientation="Horizontal">
-                    <Label HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,40,0">选择相机设备</Label>
-                    <ComboBox x:Name="camListBox" Margin="0" Width="150" VerticalAlignment="Center"/>
-                </StackPanel>
+        <ScrollViewer Grid.Row="1" Grid.Column="1">
+            <StackPanel>
+                <GroupBox Grid.Column="1" Header="相机设置" Grid.Row="1" >
+                    <StackPanel >
+                        <StackPanel Orientation="Horizontal">
+                            <Label HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,40,0">选择相机设备</Label>
+                            <ComboBox x:Name="camListBox" Margin="0" Width="150" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Grid.Column="1" Header="保存设置" Grid.Row="1" >
+                    <StackPanel >
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="chooseVideoSavePathButton" Click="chooseVideoSavePathButton_Click">视频保存位置</Button>
+                            <TextBox x:Name="videoSavePathText" IsEnabled="False"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label x:Name="chooseVideoSaveFormatButton">视频保存格式</Label>
+                            <ComboBox x:Name="VideoSaveFormatListBox" Margin="0" Width="150" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="choosePictureSavePathButton" Click="choosePictureSavePathButton_Click">截图保存位置</Button>
+                            <TextBox x:Name="PictureSavePath" IsEnabled="False"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label x:Name="choosePictureSaveFormatButton">图片保存格式</Label>
+                            <ComboBox x:Name="PictureSaveFormatListBox" Margin="0" Width="150" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
-        </GroupBox>
+        </ScrollViewer>
         <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Button Click="Button_Setting_sace_Click">保存</Button>
+            <Button Click="Button_Setting_save_Click">保存</Button>
         </StackPanel>
     </Grid>
 </Page>

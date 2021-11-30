@@ -34,8 +34,9 @@
                 <Button Content="连接相机" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Button_Connect_Cam_Click" Height="30"/>
                 <Button Content="断开连接" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Button_Disconnect_Cam_Click_" Margin="10,0" Height="30"/>
                 <Button Content="重新连接" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Button_Reconnect_Cam_Click" Margin="0,0,10,0" Height="30"/>
-                <Button Content="开始录制" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Button_recoder" Margin="0,0,10,0" Height="30"/>
-                <Button x:Name="btnSetting" Click="btnSetting_Click">设置</Button>
+                <Button x:Name="buttonRecoder" Content="开始录制" HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" Click="Button_recoder" Margin="0,0,10,0" Height="30"/>
+            <Button x:Name="buttonSnapshot" Content="截图" HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" Click="Button_Snapshot" Margin="0,0,10,0" Height="30"/>
+            <Button x:Name="btnSetting" Click="btnSetting_Click">设置</Button>
             </StackPanel>
         <!-- long hand form for setting the message -->
         <materialDesign:Snackbar
