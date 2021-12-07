@@ -25,8 +25,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Configuration;
 using FunyCamNF.utils;
-using AForge.Video.FFMPEG;
 using System.Windows.Forms.Integration;
+using AForge.Video.FFMPEG;
 
 namespace FunyCamNF.pages.main
 {
@@ -44,8 +44,8 @@ namespace FunyCamNF.pages.main
         private List<string> filterList = new List<string>();
 
         private int selectedIndex = 0;
-        private VideoFileWriter writer;
-        private bool IsRecordVideo = false;   //是否开始录像
+        private VideoFileWriter originWriter,transedWriter;
+        private bool IsRecordingVideo = false;   //是否开始录像
 
         public MainPage()
         {
@@ -75,7 +75,7 @@ namespace FunyCamNF.pages.main
                 var videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
                 if (videoDevices.Count == 0)
                     throw new ApplicationException();
-                var devideName = Tools.readSettings("lastDeviceName");
+                var devideName = Tools.readSettings("videoDevice");
                 foreach (FilterInfo device in videoDevices)
                 {
                     if (device.Name == devideName)
@@ -121,15 +121,19 @@ namespace FunyCamNF.pages.main
 
             originalSource = new VideoCaptureDevice(videoDevice.MonikerString);//连接摄像头
             originalSource.VideoResolution = originalSource.VideoCapabilities[0];
+            originalSource.NewFrame += RecodeOriginVideo;
+            //originalSource.Start();
 
             transSource = new AsyncVideoSource(originalSource);
-            transSource.NewFrame += OriginalSource_NewFrame;
-            transSource.Start();
+            transSource.NewFrame += sourceFilterEvent;
+            transSource.NewFrame += RecodeTransedVideo;
+            //transSource.Start();
 
             vp1.VideoSource = transSource;
             vp2.VideoSource = originalSource;
-            vp2.Start();
             vp1.Start();
+
+            vp2.Start();
             //保存当前滤镜名
             Tools.saveSettings("lastFilterName", filterList[filterListBox.SelectedIndex]);
             //允许点击截图和录制
@@ -137,7 +141,7 @@ namespace FunyCamNF.pages.main
             buttonSnapshot.IsEnabled=true;
         }
 
-        private void OriginalSource_NewFrame(object sender, NewFrameEventArgs eventArgs)
+        private void sourceFilterEvent(object sender, NewFrameEventArgs eventArgs)
         {
             Bitmap bitmap = eventArgs.Frame;
 
@@ -354,6 +358,70 @@ namespace FunyCamNF.pages.main
 
         private void Button_recoder(object sender, RoutedEventArgs e)
         {
+            if (IsRecordingVideo)
+            {
+                IsRecordingVideo = false;
+                RecoderStop();
+                IsRecordingVideo = false;
+                buttonRecoder.Content = "开始录制";
+
+            }
+            else
+            {
+                RecoderStart();
+                IsRecordingVideo = true;
+                buttonRecoder.Content = "停止录制";
+
+            }
+        }
+
+        //停止录制
+        private void RecoderStop()
+        {
+            this.originWriter.Close();
+            this.transedWriter.Close();
+        }
+        //开始录制
+        private void RecoderStart()
+        {
+            int width = originalSource.VideoResolution.FrameSize.Width;    //录制视频的宽度
+            int height = originalSource.VideoResolution.FrameSize.Height;   //录制视频的高度
+            int fps = originalSource.VideoResolution.AverageFrameRate;
+
+            string path = Tools.readSettings("VideoSavePath");
+            string fileName = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString();
+
+            this.originWriter = new VideoFileWriter();
+            this.transedWriter = new VideoFileWriter();
+
+            if (this.originalSource.IsRunning && this.transSource.IsRunning)
+            {
+                originWriter.Open(path + '\\' + fileName + "原始录像.avi", width, height, fps, VideoCodec.MPEG4);
+                transedWriter.Open(path + '\\' + fileName + "哈哈镜处理录像.avi", width, height, fps, VideoCodec.MPEG4);
+
+            }
+            else
+                MessageBox.Show("没有视频源输入，无法录制视频。", "错误");
+
+        }
+        //录制事件处理函数
+        private void RecodeOriginVideo(object sender, NewFrameEventArgs eventArgs)
+        {
+            if (IsRecordingVideo)
+            {
+                Bitmap bitmap = eventArgs.Frame;    //获取到一帧图像
+                originWriter.WriteVideoFrame(bitmap);
+            }
+
+        }
+        private void RecodeTransedVideo(object sender, NewFrameEventArgs eventArgs)
+        {
+            if (IsRecordingVideo)
+            {
+                Bitmap bitmap = eventArgs.Frame;    //获取到一帧图像
+                transedWriter.WriteVideoFrame(bitmap);
+            }
+
         }
     }
 }
