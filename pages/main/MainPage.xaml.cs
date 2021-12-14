@@ -63,6 +63,7 @@ namespace FunyCamNF.pages.main
             filterList.Add("凸透镜");
             filterList.Add("凹透镜");
             filterList.Add("复合效果(十字分区)");
+            filterList.Add("凸透镜(并行)");
             filterListBox.ItemsSource = filterList;
             getDevices();
             formsHostFiltered = formHost1;
@@ -244,6 +245,13 @@ namespace FunyCamNF.pages.main
                     {
                         ComplexFilter complexFilter = new ComplexFilter();
                         complexFilter.ApplyInPlace(bitmap);
+                        break;
+                    }
+
+                case "凸透镜(并行)":
+                    {
+                        ConvexFilterMultithread concaveFilterMultithread = new ConvexFilterMultithread();
+                        concaveFilterMultithread.ApplyInPlace(bitmap);
                         break;
                     }
             }

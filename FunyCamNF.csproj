@@ -165,9 +165,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ConvexTest2.cs" />
     <Compile Include="filters\ComplexFilter.cs" />
     <Compile Include="filters\ConcaveFilter.cs" />
     <Compile Include="filters\ConvexFilter.cs" />
+    <Compile Include="filters\ConvexFilterMultithread.cs" />
     <Compile Include="filters\DynamicRotateFilter.cs" />
     <Compile Include="filters\TransX.cs" />
     <Compile Include="frame\Frame.cs" />
