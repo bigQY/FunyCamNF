@@ -61,8 +61,8 @@ namespace FunyCamNF.filters
                 for (int i = 0; i < w; i++)
                 {
                     oldX = i;
-                    //oldY = j * 2;
-                    oldY = j*j;
+                    oldY = j / 2;
+                    //oldY = j*j;
                     int tempB = i * 3 + j * w * 3;
                     int tempG = i * 3 + j * w * 3 + 1;
                     int tempR = i * 3 + j * w * 3 + 2;

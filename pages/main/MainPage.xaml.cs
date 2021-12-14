@@ -44,6 +44,7 @@ namespace FunyCamNF.pages.main
         private List<string> filterList = new List<string>();
 
         private int selectedIndex = 0;
+        private string selectedFilterName = "";
         private VideoFileWriter originWriter,transedWriter;
         private bool IsRecordingVideo = false;   //是否开始录像
 
@@ -53,14 +54,15 @@ namespace FunyCamNF.pages.main
             SnackbarERROR.MessageQueue = new SnackbarMessageQueue();
             filterList.Add("反色");
             filterList.Add("模糊");
-            filterList.Add("edges");
-            filterList.Add("pixellate");
-            filterList.Add("Jitter");
+            filterList.Add("边缘强化");
+            filterList.Add("像素化");
+            filterList.Add("随机抖动");
             filterList.Add("Erosion3x3");
             filterList.Add("动态旋转");
-            filterList.Add("拉伸1");
+            filterList.Add("纵向拉伸");
             filterList.Add("凸透镜");
             filterList.Add("凹透镜");
+            filterList.Add("复合效果(十字分区)");
             filterListBox.ItemsSource = filterList;
             getDevices();
             formsHostFiltered = formHost1;
@@ -134,85 +136,114 @@ namespace FunyCamNF.pages.main
             vp1.Start();
 
             vp2.Start();
+
+
+            while (vp1.GetCurrentVideoFrame() == null)
+            {
+                Button_Disconnect_Cam_Click_(sender, e);
+                originalSource = new VideoCaptureDevice(videoDevice.MonikerString);//连接摄像头
+                originalSource.VideoResolution = originalSource.VideoCapabilities[0];
+                originalSource.NewFrame += RecodeOriginVideo;
+                //originalSource.Start();
+
+                transSource = new AsyncVideoSource(originalSource);
+                transSource.NewFrame += sourceFilterEvent;
+                transSource.NewFrame += RecodeTransedVideo;
+                //transSource.Start();
+
+                vp1.VideoSource = transSource;
+                vp2.VideoSource = originalSource;
+                vp1.Start();
+
+                vp2.Start();
+                Thread.Sleep(2000);
+            }
+
+
             //保存当前滤镜名
             Tools.saveSettings("lastFilterName", filterList[filterListBox.SelectedIndex]);
             //允许点击截图和录制
             buttonRecoder.IsEnabled = true;
-            buttonSnapshot.IsEnabled=true;
+            buttonSnapshot.IsEnabled = true;
         }
 
         private void sourceFilterEvent(object sender, NewFrameEventArgs eventArgs)
         {
             Bitmap bitmap = eventArgs.Frame;
-
-            switch (selectedIndex)
+            switch (selectedFilterName)
             {
-                case 0:
+                case "反色":
                     {
                         Invert filter = new Invert();
                         filter.ApplyInPlace(bitmap);
                         break;
                     }
 
-                case 1:
+                case "模糊":
                     {
                         Blur filter = new Blur();
                         filter.ApplyInPlace(bitmap);
                         break;
                     }
 
-                case 2:
+                case "边缘强化":
                     {
                         Edges filter = new Edges();
                         filter.ApplyInPlace(bitmap);
                         break;
                     }
 
-                case 3:
+                case "像素化":
                     {
                         Pixellate pixellate = new Pixellate(50);
                         pixellate.ApplyInPlace(bitmap);
                         break;
                     }
 
-                case 4:
+                case "随机抖动":
                     {
                         Jitter pointed = new Jitter(500);
                         pointed.ApplyInPlace(bitmap);
                         break;
                     }
 
-                case 5:
+                case "Erosion3x3":
                     {
                         TestFilter testFilter = new TestFilter();
                         testFilter.ApplyInPlace(bitmap);
                         break;
                     }
 
-                case 6:
+                case "动态旋转":
                     {
                         DynamicRotateFilter dynamicRotateFilter = new DynamicRotateFilter();
                         dynamicRotateFilter.ApplyInPlace(bitmap);
                         break;
                     }
 
-                case 7:
+                case "纵向拉伸":
                     {
                         TransX transX = new TransX();
                         transX.ApplyInPlace(bitmap);
                         break;
                     }
 
-                case 8:
+                case "凸透镜":
                     {
                         ConvexFilter convex = new ConvexFilter();
                         convex.ApplyInPlace(bitmap);
                         break;
                     }
-                case 9:
+                case "凹透镜":
                     {
                         ConcaveFilter concave = new ConcaveFilter();
                         concave.ApplyInPlace(bitmap);
+                        break;
+                    }
+                case "复合效果(十字分区)":
+                    {
+                        ComplexFilter complexFilter = new ComplexFilter();
+                        complexFilter.ApplyInPlace(bitmap);
                         break;
                     }
             }
@@ -221,8 +252,10 @@ namespace FunyCamNF.pages.main
 
         private void Button_Disconnect_Cam_Click_(object sender, RoutedEventArgs e)
         {
-            vp2.WaitForStop();
-            vp1.WaitForStop();
+            vp2.Stop();
+            vp1.Stop();
+            //vp2.Dispose();
+            //vp1.Dispose();
         }
 
         private void Button_Reconnect_Cam_Click(object sender, RoutedEventArgs e)
@@ -234,6 +267,7 @@ namespace FunyCamNF.pages.main
         private void filterListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             selectedIndex = filterListBox.SelectedIndex;
+            selectedFilterName = (string)filterListBox.SelectedItem;
         }
 
         private void btnSetting_Click(object sender, RoutedEventArgs e)

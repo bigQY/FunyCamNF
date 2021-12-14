@@ -165,6 +165,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="filters\ComplexFilter.cs" />
     <Compile Include="filters\ConcaveFilter.cs" />
     <Compile Include="filters\ConvexFilter.cs" />
     <Compile Include="filters\DynamicRotateFilter.cs" />

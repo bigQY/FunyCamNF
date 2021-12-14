@@ -1,133 +1,97 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AForge.Imaging;
+﻿using AForge.Imaging;
 using AForge.Imaging.Filters;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using FunyCamNF.frame;
 
 namespace FunyCamNF.filters
 {
-    class DynamicRotateFilter : BaseInPlaceFilter
+    class DynamicRotateFilter : BaseInPlacePartialFilter
     {
-        public DynamicRotateFilter()
-        {
-            // initialize format translation dictionary
-            formatTranslations[PixelFormat.Format8bppIndexed] = PixelFormat.Format8bppIndexed;
-            formatTranslations[PixelFormat.Format24bppRgb] = PixelFormat.Format24bppRgb;
-            formatTranslations[PixelFormat.Format16bppGrayScale] = PixelFormat.Format16bppGrayScale;
-            formatTranslations[PixelFormat.Format48bppRgb] = PixelFormat.Format48bppRgb;
-        }
-        private Opening opening = new Opening();
-        private Subtract subtract = new Subtract();
+        public Dictionary<PixelFormat, PixelFormat> formatTranslations = new Dictionary<PixelFormat, PixelFormat>();
 
-        // private format translation dictionary
-        private Dictionary<PixelFormat, PixelFormat> formatTranslations = new Dictionary<PixelFormat, PixelFormat>();
-
-        /// <summary>
-        /// Format translations dictionary.
-        /// </summary>
         public override Dictionary<PixelFormat, PixelFormat> FormatTranslations
         {
             get { return formatTranslations; }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TopHat"/> class.
-        /// </summary>
-        /// 
-        /// <param name="se">Structuring element to pass to <see cref="Opening"/> operator.</param>
-        /// 
-        public DynamicRotateFilter(short[,] se) : this()
+        public DynamicRotateFilter()
         {
-            opening = new Opening(se);
+            formatTranslations[PixelFormat.Format8bppIndexed] = PixelFormat.Format8bppIndexed;
+            formatTranslations[PixelFormat.Format24bppRgb] = PixelFormat.Format24bppRgb;
+            formatTranslations[PixelFormat.Format16bppGrayScale] = PixelFormat.Format16bppGrayScale;
+            formatTranslations[PixelFormat.Format48bppRgb] = PixelFormat.Format48bppRgb;
         }
 
-        /// <summary>
-        /// Process the filter on the specified image.
-        /// </summary>
-        /// 
-        /// <param name="image">Source image data.</param>
-        ///
-        protected override unsafe void ProcessFilter(UnmanagedImage image)
+        private static void WriteBytesToPtr(IntPtr intPtr, byte[] bytes)
         {
-            Random rd = new Random();
-            int width = image.Width;
-            int height = image.Height;
-            // do the job
-            byte* src = (byte*)image.ImageData.ToPointer();
-            // allign pointer to the first pixel to process
-            Pixel[,] newFrame = new Pixel[width, height];
-            byte[] newFrameSrc = new byte[3 * width * height];
-            byte* newFrameSrcp;
-            fixed (byte* t = newFrameSrc)
+            int j;
+            for (j = 0; j < bytes.Length; j++)
             {
-                newFrameSrcp = t;
+                Marshal.WriteByte(intPtr, j, bytes[j]);
             }
-            //copy
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    Pixel pixel = new Pixel(x, y, newFrameSrcp, width, height);
-                    pixel.B = 0;
-                    pixel.G = 0;
-                    pixel.R = 0;
-                    newFrame[x, y] = pixel;
-                }
-            }
-            //transform
+        }
 
-            //x = (x'- rx0)*cos(RotaryAngle) - (y' - ry0)*sin(RotaryAngle) + rx0;
 
-            //y = (x'- rx0)*sin(RotaryAngle) + (y' - ry0)*cos(RotaryAngle) + ry0;
-            double angle = 20/180 * Math.PI;
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
+        protected override unsafe void ProcessFilter(UnmanagedImage image, Rectangle rect)
+        {
+            int pixelSize = ((image.PixelFormat == PixelFormat.Format8bppIndexed) || (image.PixelFormat == PixelFormat.Format16bppGrayScale) ? 1 : 3);
+            int startY = rect.Top;
+            int stopY = startY + rect.Height;
+            int startX = rect.Left * pixelSize;
+            int stopX = startX + rect.Width * pixelSize;
+            int srcLength = rect.Width * rect.Height * pixelSize;
+            byte* basePtr = (byte*)image.ImageData.ToPointer();
+            byte[] result = pixelProcess(basePtr, srcLength, rect.Width, rect.Height);
+            WriteBytesToPtr(image.ImageData, result);
+        }
 
-                    double x1 = 0.5*(x - (width / 2) * Math.Cos(angle)) + (y - (height / 2) * Math.Sin(angle) + (width / 2));
-                    double y1 = 0.5*-(x - (width / 2) * Math.Sin(angle)) + (y -  (height / 2) * Math.Cos(angle) + (height / 2));
-                    if (x1 >= width || x1 < 0 || y1 >= height || y1 < 0)
-                    {
-                        
-                    }
-                    else
-                    {
-                        Pixel pixel = newFrame[(int)x1, (int)y1];
-                        Pixel pixel1 = new Pixel(x, y, src, width, height);
-                        pixel.B = pixel1.B;
-                        pixel.G = pixel1.G;
-                        pixel.R = pixel1.R;
-                    }
-  
-                }
-            }
-            //apply
-            for (int x = 0; x < width; x++)
+        private unsafe byte[] pixelProcess(byte* srcData, int length, int w, int h)
+        {
+            int oldX = 0;
+            int oldY = 0;
+            int centerX = w / 2;
+            int centerY = h / 2;
+            byte[] tempData = new byte[length];
+            int timestamp= (int)(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds()/14);
+            //扭曲区间
+            int R = (int)(Math.Sqrt(w * w + h * h) / 2)+(timestamp%200);
+            for (int j = 0; j < h; j++)
             {
-                for (int y = 0; y < height; y++)
+                for (int i = 0; i < w; i++)
                 {
-                    Pixel pixel = newFrame[x, y];
-                    if (pixel != null)
+                    oldX = i;
+                    //oldY = j * 2;
+                    oldY = j;
+
+                    double dis = Math.Sqrt((centerX - i) * (centerX - i) + (centerY - j) * (centerY - j));
+
+                    int newX = (int)((oldX - centerX) * dis / R + centerX);
+                    int newY = (int)((oldY - centerY) * dis / R + centerY);
+
+                    int tempB = i * 3 + j * w * 3;
+                    int tempG = i * 3 + j * w * 3 + 1;
+                    int tempR = i * 3 + j * w * 3 + 2;
+                    /*int srcB = oldX * 3 + oldY * w * 3;
+                    int srcG = oldX * 3 + oldY * w * 3 + 1;
+                    int srcR = oldX * 3 + oldY * w * 3 + 2;*/
+                    int srcB = newX * 3 + newY * w * 3;
+                    int srcG = newX * 3 + newY * w * 3 + 1;
+                    int srcR = newX * 3 + newY * w * 3 + 2;
+                    if ((tempB <= length) && (tempG <= length) && (tempR <= length) && (srcB <= length) && (srcG <= length) && (srcR <= length))
                     {
-                        Pixel t = new Pixel(x, y, src, width, height);
-                        t.B = pixel.B;
-                        t.G = pixel.G;
-                        t.R = pixel.R;
+                        tempData[tempB] = srcData[srcB];
+                        tempData[tempG] = srcData[srcG];
+                        tempData[tempR] = srcData[srcR];
                     }
                 }
             }
-
+            return tempData;
         }
     }
 }
